@@ -310,6 +310,21 @@ body.fx-open{overflow:hidden}
 .supp.on .sc svg{opacity:1}
 .supp.on .st{color:var(--gold)}
 .supp small.gold{color:var(--gold)}
+.ytctl{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.mlabel2{min-width:86px}
+.mt{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;max-width:520px}
+.mt .mh{font-size:11px;font-weight:700;color:var(--text-2);text-align:center;text-transform:uppercase;letter-spacing:.06em;padding-bottom:2px}
+.mc{aspect-ratio:1;max-width:100%;min-width:0;border-radius:8px;border:0;padding:0;background:var(--surface-hi);color:var(--text-2);font:inherit;font-size:14px;font-weight:600;display:grid;place-items:center;cursor:pointer;font-variant-numeric:tabular-nums}
+.mc:hover{outline:1px solid var(--text-2)}
+.mc.on{color:var(--bg);font-weight:800}
+.mc.on.isrest{color:var(--text)}
+.mc.fut{background:var(--surface);cursor:default;opacity:.55}
+.mc.fut:hover{outline:0}
+.mc.na{visibility:hidden}
+.mc.today{outline:2px solid var(--gold);outline-offset:2px}
+.mc.sel{outline:2px solid var(--text);outline-offset:2px}
+.msum{color:var(--text-2)}
+.msum b{color:var(--gold);font-weight:700}
 .gfields{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px;margin-block:8px}
 
 /* Schwebende Leisten */
@@ -343,7 +358,7 @@ body.fx-open{overflow:hidden}
 .upd span{margin-right:auto;font-weight:600}
 @media (min-width:720px){.upd{bottom:calc(16px + env(safe-area-inset-bottom,0px))}}
 </style>
-<script>window.MYO_VERSION="2026-11-10 17:22";</script>
+<script>window.MYO_VERSION="2026-11-10 17:54";</script>
 <script src="config.js"></script>
 </head>
 <body>
@@ -853,24 +868,44 @@ function drawCharts(){
 /* ---------- Ansichten: Fortschritt, Ernährung ---------- */
 function stat(v,u,label){return'<div class="stat"><b class="tn">'+v+(u?'<small>'+u+'</small>':'')+'</b><span>'+label+'</span></div>'}
 function trackerHtml(){
-  var cy=new Date().getFullYear(),y=ui.year||cy,m=dayMap(),tk=dkey(new Date()),cnt={},d,mo;
+  var view=S.settings.ytView==='month'?'month':'year',cy=new Date().getFullYear(),m=dayMap(),tk=dkey(new Date()),cnt={},d,mo,k,c,dt;
   var MN=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
-  var h='<section class="block" aria-labelledby="h-yt"><div class="row between wrap"><div><p class="kicker">Was habe ich gemacht?</p><h2 id="h-yt">Jahresübersicht</h2></div>'
-    +'<div class="daynav"><button class="icon-btn" data-act="yPrev" aria-label="Vorjahr">\u2039</button><span class="dlabel tn">'+y+'</span><button class="icon-btn" data-act="yNext" aria-label="Folgejahr"'+(y>=cy?' disabled':'')+'>\u203a</button></div></div>';
-  h+='<div class="yt" role="group" aria-label="Aktivitäten '+y+'"><span></span>';
-  for(d=1;d<=31;d++)h+='<span class="dh">'+(d===1||d%5===0?d:'')+'</span>';
-  for(mo=0;mo<12;mo++){
-    h+='<span class="mn">'+MN[mo]+'</span>';
-    for(d=1;d<=31;d++){
-      var dt=new Date(y,mo,d,12);
-      if(dt.getMonth()!==mo){h+='<span class="yc na"></span>';continue}
-      var k=dkey(dt);
-      if(k>tk){h+='<span class="yc fut"></span>';continue}
-      var c=m[k];if(c)cnt[c]=(cnt[c]||0)+1;
-      h+='<button class="yc'+(k===tk?' today':'')+(ui.pick===k?' sel':'')+'" data-act="pickDay" data-d="'+k+'"'+(c?' style="background:'+catVar(c)+'"':'')+' aria-label="'+fShort.format(dt)+': '+(c?esc(catName(c)):'kein Eintrag')+'"></button>';
+  var MNL=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  var seg='<div class="seg" role="radiogroup" aria-label="Ansicht">'+[['year','Jahr'],['month','Monat']].map(function(x){var on=x[0]===view;return'<button class="'+(on?'on':'')+'" role="radio" aria-checked="'+on+'" data-act="ytView" data-v="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div>';
+  var h='<section class="block" aria-labelledby="h-yt"><div><p class="kicker">Was habe ich gemacht?</p><h2 id="h-yt">'+(view==='month'?'Monatsübersicht':'Jahresübersicht')+'</h2></div>';
+  if(view==='year'){
+    var y=ui.year||cy;
+    h+='<div class="ytctl">'+seg+'<div class="daynav"><button class="icon-btn" data-act="yPrev" aria-label="Vorjahr">‹</button><span class="dlabel tn">'+y+'</span><button class="icon-btn" data-act="yNext" aria-label="Folgejahr"'+(y>=cy?' disabled':'')+'>›</button></div></div>';
+    h+='<div class="yt" role="group" aria-label="Aktivitäten '+y+'"><span></span>';
+    for(d=1;d<=31;d++)h+='<span class="dh">'+(d===1||d%5===0?d:'')+'</span>';
+    for(mo=0;mo<12;mo++){
+      h+='<span class="mn">'+MN[mo]+'</span>';
+      for(d=1;d<=31;d++){
+        dt=new Date(y,mo,d,12);
+        if(dt.getMonth()!==mo){h+='<span class="yc na"></span>';continue}
+        k=dkey(dt);
+        if(k>tk){h+='<span class="yc fut"></span>';continue}
+        c=m[k];if(c)cnt[c]=(cnt[c]||0)+1;
+        h+='<button class="yc'+(k===tk?' today':'')+(ui.pick===k?' sel':'')+'" data-act="pickDay" data-d="'+k+'"'+(c?' style="background:'+catVar(c)+'"':'')+' aria-label="'+fShort.format(dt)+': '+(c?esc(catName(c)):'kein Eintrag')+'"></button>';
+      }
     }
+    h+='</div>';
+  }else{
+    var cur=ui.ym?pdate(ui.ym+'-01'):new Date(),y2=cur.getFullYear(),m2=cur.getMonth(),ym=y2+'-'+pad(m2+1);
+    h+='<div class="ytctl">'+seg+'<div class="daynav"><button class="icon-btn" data-act="mPrev" aria-label="Vormonat">‹</button><span class="dlabel mlabel2">'+MN[m2]+' '+y2+'</span><button class="icon-btn" data-act="mNext" aria-label="Folgemonat"'+(ym>=tk.slice(0,7)?' disabled':'')+'>›</button></div></div>';
+    var off=(new Date(y2,m2,1,12).getDay()+6)%7,days=new Date(y2,m2+1,0,12).getDate();
+    h+='<div class="mt" role="group" aria-label="Aktivitäten '+MNL[m2]+' '+y2+'">'+['Mo','Di','Mi','Do','Fr','Sa','So'].map(function(x){return'<span class="mh">'+x+'</span>'}).join('');
+    for(d=0;d<off;d++)h+='<span class="mc na"></span>';
+    for(d=1;d<=days;d++){
+      dt=new Date(y2,m2,d,12);k=dkey(dt);
+      if(k>tk){h+='<span class="mc fut">'+d+'</span>';continue}
+      c=m[k];if(c)cnt[c]=(cnt[c]||0)+1;
+      h+='<button class="mc'+(c?(c==='rest'?' on isrest':' on'):'')+(k===tk?' today':'')+(ui.pick===k?' sel':'')+'" data-act="pickDay" data-d="'+k+'"'+(c?' style="background:'+catVar(c)+'"':'')+' aria-label="'+fLong.format(dt)+': '+(c?esc(catName(c)):'kein Eintrag')+'">'+d+'</button>';
+    }
+    h+='</div>';
+    var tr=0,rs=0;Object.keys(cnt).forEach(function(x){if(x==='rest')rs+=cnt[x];else tr+=cnt[x]});
+    h+='<p class="msum tn"><b>'+tr+'</b> '+(tr===1?'Training':'Trainings')+' · <b>'+rs+'</b> '+(rs===1?'Restday':'Restdays')+' im '+MNL[m2]+'</p>';
   }
-  h+='</div>';
   function li(key,name){return'<span class="li"><i style="background:'+catVar(key)+'"></i><span class="ln2">'+esc(name)+'</span><b class="tn">'+(cnt[key]||0)+'</b></span>'}
   var pl=S.plans.map(function(p){return li('plan:'+p.id,p.name)}).join('')+(cnt.free?li('free','Freies Training'):'');
   h+='<div class="leg">'+pl+li('rest','Restday')+'</div>';
@@ -1470,6 +1505,9 @@ var A={
   pickClose:function(){ui.pick=null;render()},
   setDay:function(b){if(!ui.pick)return;S.days[ui.pick]=b.dataset.c;var n=catName(b.dataset.c);ui.pick=null;save();render();toast(n+' eingetragen')},
   clearDay:function(){if(!ui.pick)return;delete S.days[ui.pick];ui.pick=null;save();render()},
+  ytView:function(b){S.settings.ytView=b.dataset.v==='month'?'month':'year';ui.pick=null;save();render()},
+  mPrev:function(){var c=ui.ym?pdate(ui.ym+'-01'):new Date();c=new Date(c.getFullYear(),c.getMonth()-1,1,12);ui.ym=c.getFullYear()+'-'+pad(c.getMonth()+1);ui.pick=null;render()},
+  mNext:function(){var c=ui.ym?pdate(ui.ym+'-01'):new Date();c=new Date(c.getFullYear(),c.getMonth()+1,1,12);var ym=c.getFullYear()+'-'+pad(c.getMonth()+1);if(ym<=dkey(new Date()).slice(0,7)){ui.ym=ym;ui.pick=null;render()}},
   yPrev:function(){ui.year=(ui.year||new Date().getFullYear())-1;ui.pick=null;render()},
   yNext:function(){var cy=new Date().getFullYear(),y=(ui.year||cy)+1;if(y<=cy){ui.year=y;ui.pick=null;render()}},
   prNew:function(){ui.preset={id:null,n:'',kcal:'',p:'',c:'',f:''};render();var i=$('prN');if(i)i.focus()},

@@ -3,7 +3,7 @@
 Training, Ernährung und Fortschritt als installierbare Web-App (PWA).
 
 ## Aufbau
-- `index.html`: die komplette App
+- `index.html`: die komplette App 
 - `config.js`: Supabase-URL und öffentlicher Key für Login und Sync
 - `sw.js`: Offline-Betrieb
 - `manifest.webmanifest`, `icons/`: App-Name, Farben und Icons

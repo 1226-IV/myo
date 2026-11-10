@@ -339,7 +339,11 @@ body.fx-open{overflow:hidden}
   .rest,.toast,.sheet{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.upd{position:fixed;z-index:42;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));max-width:780px;margin-inline:auto;bottom:calc(var(--navh) + env(safe-area-inset-bottom,0px) + 10px);background:var(--surface-hi);color:var(--text);border:1px solid var(--gold);border-radius:8px;padding:8px 8px 8px 14px;display:flex;align-items:center;gap:10px}
+.upd span{margin-right:auto;font-weight:600}
+@media (min-width:720px){.upd{bottom:calc(16px + env(safe-area-inset-bottom,0px))}}
 </style>
+<script>window.MYO_VERSION="2026-11-10 17:17";</script>
 <script src="config.js"></script>
 </head>
 <body>
@@ -1238,7 +1242,7 @@ function dataHtml(){
     +'<div class="field"><label for="imp">Sicherung einfügen</label><textarea id="imp" placeholder="Kopierten Text hier einfügen"></textarea></div>'
     +'<p class="err" id="impMsg" role="alert" hidden></p>'
     +'<div class="row wrap"><button class="btn sm" data-act="restore">Wiederherstellen</button><button class="btn sm ghost" data-act="wipe" data-confirm="Auch im Konto löschen?">Alle Daten löschen</button></div>'
-    +'<p class="cap">Myo · App-Version</p>'
+    +'<p class="cap">Myo · Version '+esc(String(window.MYO_VERSION||'lokal'))+'</p>'
     +'</div></details></section>';
 }
 function doAuth(mode){
@@ -1290,8 +1294,23 @@ function keepAwake(){
     }else if(!want&&wl){wl.release();wl=null}
   }catch(e){}
 }
+function checkUpdate(){
+  if(!window.MYO_VERSION||navigator.onLine===false)return;
+  fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(j){
+    if(j&&j.version&&j.version!==window.MYO_VERSION)showUpdate();
+  }).catch(function(){});
+}
+function showUpdate(){
+  if($('upd')&&!$('upd').hidden)return;
+  var d=$('upd');
+  if(!d||!d.parentNode){d=document.createElement('div');d.id='upd';d.className='upd';d.setAttribute('role','status');document.body.appendChild(d)}
+  d.innerHTML='<span>Neue Version verfügbar</span><button class="btn sm primary" data-act="reloadApp">Neu laden</button>';d.hidden=false;
+}
 function initSync(){
   pwaExtend();
+  A.reloadApp=function(){location.reload()};
+  setTimeout(checkUpdate,3000);setInterval(checkUpdate,600000);
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')checkUpdate()});
   setInterval(keepAwake,1000);
   if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js').catch(function(){})}catch(e){}}
   paintSync();

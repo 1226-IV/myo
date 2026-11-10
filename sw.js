@@ -1,16 +1,24 @@
-/* Offline-Betrieb: App-Dateien und Schriften kommen aus dem Cache und werden im Hintergrund aktualisiert.
-   Anfragen an Supabase (Login, Sync) gehen immer direkt ins Netz. */
-const CACHE='myo-v1';
-const SHELL=['./','./index.html','./config.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/maskable-512.png'];
+/* Offline-Betrieb für Myo.
+   Eigene Dateien: zuerst aus dem Netz (damit Updates sofort ankommen), bei schlechtem oder fehlendem Netz aus dem Speicher.
+   Schriften: aus dem Speicher. Supabase (Login, Sync) geht immer direkt ins Netz. */
+const CACHE='myo-v2';
+const SHELL=['./','./index.html','./config.js','./version.json','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/maskable-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
+function fromCache(c,req){return c.match(req,{ignoreSearch:true}).then(h=>h||(req.mode==='navigate'?c.match('./'):undefined))}
+function networkFirst(req){
+  return caches.open(CACHE).then(c=>new Promise(resolve=>{
+    let done=false;const finish=r=>{if(!done){done=true;resolve(r)}};
+    const timer=setTimeout(()=>fromCache(c,req).then(h=>{if(h)finish(h)}),2500);
+    fetch(req).then(r=>{clearTimeout(timer);if(r&&r.ok)c.put(req,r.clone());finish(r)})
+      .catch(()=>{clearTimeout(timer);fromCache(c,req).then(h=>finish(h||Response.error()))});
+  }));
+}
 self.addEventListener('fetch',e=>{
   if(e.request.method!=='GET')return;
   const u=new URL(e.request.url);
-  const own=u.origin===self.location.origin,font=u.hostname==='fonts.googleapis.com'||u.hostname==='fonts.gstatic.com';
-  if(!own&&!font)return;
-  e.respondWith(caches.open(CACHE).then(c=>c.match(e.request,{ignoreSearch:own}).then(hit=>{
-    const net=fetch(e.request).then(r=>{if(r&&(r.ok||r.type==='opaque'))c.put(e.request,r.clone());return r}).catch(()=>hit||(e.request.mode==='navigate'?c.match('./'):undefined));
-    return hit||net;
-  })));
+  if(u.origin===self.location.origin){e.respondWith(networkFirst(e.request));return}
+  if(u.hostname==='fonts.googleapis.com'||u.hostname==='fonts.gstatic.com'){
+    e.respondWith(caches.open(CACHE).then(c=>c.match(e.request).then(hit=>hit||fetch(e.request).then(r=>{if(r&&(r.ok||r.type==='opaque'))c.put(e.request,r.clone());return r}))));
+  }
 });

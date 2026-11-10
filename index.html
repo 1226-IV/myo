@@ -343,7 +343,7 @@ body.fx-open{overflow:hidden}
 .upd span{margin-right:auto;font-weight:600}
 @media (min-width:720px){.upd{bottom:calc(16px + env(safe-area-inset-bottom,0px))}}
 </style>
-<script>window.MYO_VERSION="2026-11-10 17:17";</script>
+<script>window.MYO_VERSION="2026-11-10 17:22";</script>
 <script src="config.js"></script>
 </head>
 <body>
@@ -1312,7 +1312,7 @@ function initSync(){
   setTimeout(checkUpdate,3000);setInterval(checkUpdate,600000);
   document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')checkUpdate()});
   setInterval(keepAwake,1000);
-  if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js').catch(function(){})}catch(e){}}
+  if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(function(r){try{r.update()}catch(e){}}).catch(function(){})}catch(e){}}
   paintSync();
   if(!sbOk()){setStatus('off');return}
   if(!authGet()){setStatus('login');return}

@@ -1,8 +1,8 @@
 /* Offline-Betrieb für Myo.
    Eigene Dateien: zuerst aus dem Netz (damit Updates sofort ankommen), bei schlechtem oder fehlendem Netz aus dem Speicher.
    Schriften: aus dem Speicher. Supabase (Login, Sync) geht immer direkt ins Netz. */
-const CACHE='myo-v3';
-const SHELL=['./','./index.html','./config.js','./version.json','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/maskable-512.png'];
+const CACHE='myo-v4';
+const SHELL=['./','./index.html','./config.js','./version.json','./manifest.webmanifest','./icons/favicon-32.png','./icons/icon-192.png','./icons/icon-512.png','./icons/maskable-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 function fromCache(c,req){return c.match(req,{ignoreSearch:true}).then(h=>h||(req.mode==='navigate'?c.match('./'):undefined))}

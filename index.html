@@ -358,7 +358,7 @@ body.fx-open{overflow:hidden}
 .upd span{margin-right:auto;font-weight:600}
 @media (min-width:720px){.upd{bottom:calc(16px + env(safe-area-inset-bottom,0px))}}
 </style>
-<script>window.MYO_VERSION="2026-11-10 17:54";</script>
+<script>window.MYO_VERSION="2026-11-11 11:10";</script>
 <script src="config.js"></script>
 </head>
 <body>
@@ -903,13 +903,9 @@ function trackerHtml(){
       h+='<button class="mc'+(c?(c==='rest'?' on isrest':' on'):'')+(k===tk?' today':'')+(ui.pick===k?' sel':'')+'" data-act="pickDay" data-d="'+k+'"'+(c?' style="background:'+catVar(c)+'"':'')+' aria-label="'+fLong.format(dt)+': '+(c?esc(catName(c)):'kein Eintrag')+'">'+d+'</button>';
     }
     h+='</div>';
-    var tr=0,rs=0;Object.keys(cnt).forEach(function(x){if(x==='rest')rs+=cnt[x];else tr+=cnt[x]});
-    h+='<p class="msum tn"><b>'+tr+'</b> '+(tr===1?'Training':'Trainings')+' · <b>'+rs+'</b> '+(rs===1?'Restday':'Restdays')+' im '+MNL[m2]+'</p>';
   }
-  function li(key,name){return'<span class="li"><i style="background:'+catVar(key)+'"></i><span class="ln2">'+esc(name)+'</span><b class="tn">'+(cnt[key]||0)+'</b></span>'}
-  var pl=S.plans.map(function(p){return li('plan:'+p.id,p.name)}).join('')+(cnt.free?li('free','Freies Training'):'');
-  h+='<div class="leg">'+pl+li('rest','Restday')+'</div>';
-  h+='<p class="cap">Trainingstage erscheinen in der Farbe des Plans. Die Farbe stellst du beim Bearbeiten des Plans ein. Tippe auf einen Tag, um einen Restday oder ein nicht geloggtes Training einzutragen.</p></section>';
+  var tr=0,rs=0;Object.keys(cnt).forEach(function(x){if(x==='rest')rs+=cnt[x];else tr+=cnt[x]});
+  h+='<p class="msum tn"><b>'+tr+'</b> '+(tr===1?'Training':'Trainings')+' · <b>'+rs+'</b> '+(rs===1?'Restday':'Restdays')+'</p></section>';
   if(ui.pick)h+=sheetHtml(m);
   return h;
 }

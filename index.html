@@ -366,7 +366,7 @@ body.fx-open .rest{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
 .upd span{margin-right:auto;font-weight:600}
 @media (min-width:720px){.upd{bottom:calc(16px + env(safe-area-inset-bottom,0px))}}
 </style>
-<script>window.MYO_VERSION="2026-11-13 11:20";</script>
+<script>window.MYO_VERSION="2026-11-13 11:30";</script>
 <script src="config.js"></script>
 </head>
 <body>
@@ -589,12 +589,6 @@ function dayMap(){
   S.workouts.forEach(function(w){m[w.d]=(w.planId&&planById(w.planId))?'plan:'+w.planId:'free'});
   Object.keys(S.days).forEach(function(k){if(validCat(S.days[k]))m[k]=S.days[k]});
   return m;
-}
-function suppStreak(k,dk){
-  var d=pdate(dk),n=0;
-  if(!(S.supps[dk]||{})[k])d=addDays(d,-1);
-  for(var i=0;i<400;i++){var kk=dkey(d);if((S.supps[kk]||{})[k]){n++;d=addDays(d,-1)}else break}
-  return n;
 }
 function lastMeal(n){for(var i=S.meals.length-1;i>=0;i--)if(S.meals[i].n===n)return S.meals[i];return null}
 /* ---------- Ansichten: gemeinsam, Training, Pläne ---------- */
@@ -982,10 +976,9 @@ function suppsHtml(dk){
   var day=S.supps[dk]||{},n=SUPPS.filter(function(s){return day[s[0]]}).length;
   var h='<section class="block" aria-labelledby="h-sup"><div class="row between"><h2 id="h-sup">Supplements</h2><span class="muted tn">'+n+' von '+SUPPS.length+'</span></div><div class="sgrid">';
   SUPPS.forEach(function(s){
-    var t=day[s[0]],st=suppStreak(s[0],dk);
+    var t=day[s[0]];
     h+='<button class="supp'+(t?' on':'')+'" data-act="supp" data-k="'+s[0]+'" aria-pressed="'+(t?'true':'false')+'"><span class="sc">'+CHECK+'</span><b>'+s[1]+'</b>'
-      +'<small class="st">'+(t?(typeof t==='string'?'Genommen um '+esc(t):'Genommen'):'Noch nicht genommen')+'</small>'
-      +(st>1?'<small class="gold tn">'+st+' Tage in Folge</small>':'')+'</button>';
+      +'<small class="st">'+(t?(typeof t==='string'?'Genommen um '+esc(t):'Genommen'):'Noch nicht genommen')+'</small></button>';
   });
   return h+'</div></section>';
 }

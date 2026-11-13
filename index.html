@@ -201,24 +201,29 @@ details>summary{cursor:pointer;font-weight:600;min-height:44px;display:flex;alig
 a.st-hero:hover{background:var(--surface-hi)}
 .st-hero h2{font-size:44px;line-height:.95}
 .st-hero .sub{font-size:15px;color:var(--text-2)}
-.st-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.st-grid{display:flex;flex-direction:column;gap:12px}
+.st-row{flex-direction:row;align-items:center;gap:16px;min-height:0;padding:14px 16px}
+.st-info{flex:0 0 38%;display:flex;flex-direction:column;gap:2px;min-width:0}
+.st-vis{flex:1;min-width:0}
 .st-l{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-2)}
 .st-v{font-size:26px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
 .st-v small{font-size:14px;font-weight:600;color:var(--text-2)}
 .st-s{font-size:13px;color:var(--text-2)}
-.st-spark{width:100%;height:40px;margin-top:auto;display:block}
+.st-spark{width:100%;height:52px;display:block}
 .st-spark path{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
 .st-spark .dot{stroke-width:7}
-.st-mac{display:flex;flex-direction:column;gap:2px;margin-top:auto;font-size:13px;font-variant-numeric:tabular-nums}
-.st-mac div{display:flex;justify-content:space-between}
-.st-mac span{color:var(--text-2)}
-.st-sup{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-2);margin-top:4px}
+.st-mac{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-variant-numeric:tabular-nums}
+.st-mac div{display:flex;flex-direction:column}
+.st-mac b{font-size:17px}
+.st-mac span{font-size:12px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-sups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 10px}
+.st-sup{display:flex;align-items:center;gap:7px;font-size:13px;line-height:1.2;color:var(--text-2);min-width:0}
 .st-sup i{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--text-2);flex:none}
 .st-sup.on{color:var(--text)}
 .st-sup.on i{background:var(--gold);border-color:var(--gold)}
-.st-wk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:auto}
+.st-wk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
 .st-wk div{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--text-2)}
-.st-wk i{width:14px;height:14px;border-radius:4px;background:var(--surface-hi);border:1px solid var(--border)}
+.st-wk i{width:100%;max-width:24px;aspect-ratio:1;border-radius:5px;box-sizing:border-box;background:var(--surface-hi);border:1px solid var(--border)}
 .st-wk i.c{border:0}
 .st-wk .td{color:var(--text)}
 .st-wk .td i{background:transparent;border:2px solid var(--pc,var(--accent))}
@@ -396,7 +401,7 @@ body.fx-open .rest{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
 .upd span{margin-right:auto;font-weight:600}
 @media (min-width:720px){.upd{bottom:calc(16px + env(safe-area-inset-bottom,0px))}}
 </style>
-<script>window.MYO_VERSION="2026-11-13 15:25";</script>
+<script>window.MYO_VERSION="2026-11-13 15:35";</script>
 <script src="config.js"></script>
 </head>
 <body>
@@ -766,11 +771,12 @@ function viewStart(){
   h+='<div class="st-grid">';
   /* Ernährung */
   var tt=totals(tk);
-  h+='<section class="st-card"><span class="st-l">Ernährung</span><span class="st-v">'+fmt(tt.kcal,0)+' <small>kcal</small></span>'
-    +'<div class="st-mac"><div><span>Protein</span><b>'+fmt(tt.p,0)+' g</b></div><div><span>Kohlenhydr.</span><b>'+fmt(tt.c,0)+' g</b></div><div><span>Fett</span><b>'+fmt(tt.f,0)+' g</b></div></div></section>';
+  h+='<section class="st-card st-row"><div class="st-info"><span class="st-l">Ernährung</span><span class="st-v">'+fmt(tt.kcal,0)+' <small>kcal</small></span></div>'
+    +'<div class="st-vis st-mac"><div><b>'+fmt(tt.p,0)+' g</b><span>Protein</span></div><div><b>'+fmt(tt.c,0)+' g</b><span>Kohlenh.</span></div><div><b>'+fmt(tt.f,0)+' g</b><span>Fett</span></div></div></section>';
   /* Supplements */
   var day=S.supps[tk]||{};
-  h+='<section class="st-card"><span class="st-l">Supplements</span>'+SUPPS.map(function(x){var on=!!day[x[0]];return'<div class="st-sup'+(on?' on':'')+'"><i></i>'+x[1]+'<span class="sr">'+(on?' genommen':' offen')+'</span></div>'}).join('')+'</section>';
+  var nsu=SUPPS.filter(function(x){return day[x[0]]}).length;
+  h+='<section class="st-card st-row"><div class="st-info"><span class="st-l">Supplements</span><span class="st-v">'+nsu+' <small>von '+SUPPS.length+'</small></span></div><div class="st-vis st-sups">'+SUPPS.map(function(x){var on=!!day[x[0]];return'<div class="st-sup'+(on?' on':'')+'"><i></i>'+x[1].replace('Vitamin ','')+'<span class="sr">'+(on?' genommen':' offen')+'</span></div>'}).join('')+'</div></section>';
   /* Gewicht */
   var lw2=S.weights.length?S.weights[S.weights.length-1]:null,wd='',sp='';
   if(lw2){
@@ -781,7 +787,7 @@ function viewStart(){
     var from=dkey(addDays(t,-30));
     sp=sparkSvg(S.weights.filter(function(w){return w.d>=from}).map(function(w){return{x:pdate(w.d).getTime(),y:w.kg}}));
   }
-  h+='<section class="st-card"><span class="st-l">Gewicht</span>'+(lw2?'<span class="st-v">'+fmt(lw2.kg,2)+' <small>kg</small></span><span class="st-s">'+wd+'</span>'+sp:'<span class="st-s">Noch kein Eintrag</span>')+'</section>';
+  h+='<section class="st-card st-row"><div class="st-info"><span class="st-l">Gewicht</span>'+(lw2?'<span class="st-v">'+fmt(lw2.kg,2)+' <small>kg</small></span><span class="st-s">'+wd+'</span>':'<span class="st-s">Noch kein Eintrag</span>')+'</div><div class="st-vis">'+sp+'</div></section>';
   /* Woche */
   var ws=weekStart(t),nt=0,nr=0,cells='';
   for(var i=0;i<7;i++){
@@ -789,8 +795,8 @@ function viewStart(){
     if(c==='rest')nr++;else if(c)nt++;
     cells+='<div'+(isT?' class="td"':'')+'><i'+(c?' class="c" style="background:'+catVar(c)+'"':'')+'></i>'+wdn(d).charAt(0)+'</div>';
   }
-  h+='<section class="st-card"><span class="st-l">Diese Woche</span><span class="st-v">'+nt+' <small>'+(nt===1?'Training':'Trainings')+'</small></span><span class="st-s">'+nr+' '+(nr===1?'Restday':'Restdays')+'</span>'
-    +'<div class="st-wk" style="--pc:'+(nxp?catVar('plan:'+nxp.id):'var(--accent)')+'" role="img" aria-label="Diese Woche: '+nt+' Trainings, '+nr+' Restdays">'+cells+'</div></section>';
+  h+='<section class="st-card st-row"><div class="st-info"><span class="st-l">Diese Woche</span><span class="st-v">'+nt+' <small>'+(nt===1?'Training':'Trainings')+'</small></span><span class="st-s">'+nr+' '+(nr===1?'Restday':'Restdays')+'</span></div>'
+    +'<div class="st-vis st-wk" style="--pc:'+(nxp?catVar('plan:'+nxp.id):'var(--accent)')+'" role="img" aria-label="Diese Woche: '+nt+' Trainings, '+nr+' Restdays">'+cells+'</div></section>';
   return h+'</div></div>';
 }
 function viewTraining(){return (S.active?activeHtml():startHtml())+historyHtml()+(fxShown()?focusHtml():'')}

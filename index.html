@@ -396,7 +396,7 @@ body.fx-open .rest{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
 .upd span{margin-right:auto;font-weight:600}
 @media (min-width:720px){.upd{bottom:calc(16px + env(safe-area-inset-bottom,0px))}}
 </style>
-<script>window.MYO_VERSION="2026-11-13 15:20";</script>
+<script>window.MYO_VERSION="2026-11-13 15:25";</script>
 <script src="config.js"></script>
 </head>
 <body>
@@ -764,6 +764,13 @@ function viewStart(){
   }else{kick='Heute';title='Kein Plan';sub='Lege im Training einen Plan an';pc='var(--accent)'}
   h+='<a class="st-card st-hero" href="#training" data-act="tab" data-tab="training" style="--pc:'+pc+'"><span class="kicker">'+kick+'</span><h2>'+esc(title)+'</h2><span class="sub">'+esc(sub)+'</span></a>';
   h+='<div class="st-grid">';
+  /* Ernährung */
+  var tt=totals(tk);
+  h+='<section class="st-card"><span class="st-l">Ernährung</span><span class="st-v">'+fmt(tt.kcal,0)+' <small>kcal</small></span>'
+    +'<div class="st-mac"><div><span>Protein</span><b>'+fmt(tt.p,0)+' g</b></div><div><span>Kohlenhydr.</span><b>'+fmt(tt.c,0)+' g</b></div><div><span>Fett</span><b>'+fmt(tt.f,0)+' g</b></div></div></section>';
+  /* Supplements */
+  var day=S.supps[tk]||{};
+  h+='<section class="st-card"><span class="st-l">Supplements</span>'+SUPPS.map(function(x){var on=!!day[x[0]];return'<div class="st-sup'+(on?' on':'')+'"><i></i>'+x[1]+'<span class="sr">'+(on?' genommen':' offen')+'</span></div>'}).join('')+'</section>';
   /* Gewicht */
   var lw2=S.weights.length?S.weights[S.weights.length-1]:null,wd='',sp='';
   if(lw2){
@@ -775,13 +782,6 @@ function viewStart(){
     sp=sparkSvg(S.weights.filter(function(w){return w.d>=from}).map(function(w){return{x:pdate(w.d).getTime(),y:w.kg}}));
   }
   h+='<section class="st-card"><span class="st-l">Gewicht</span>'+(lw2?'<span class="st-v">'+fmt(lw2.kg,2)+' <small>kg</small></span><span class="st-s">'+wd+'</span>'+sp:'<span class="st-s">Noch kein Eintrag</span>')+'</section>';
-  /* Ernährung */
-  var tt=totals(tk);
-  h+='<section class="st-card"><span class="st-l">Ernährung</span><span class="st-v">'+fmt(tt.kcal,0)+' <small>kcal</small></span>'
-    +'<div class="st-mac"><div><span>Protein</span><b>'+fmt(tt.p,0)+' g</b></div><div><span>Kohlenhydr.</span><b>'+fmt(tt.c,0)+' g</b></div><div><span>Fett</span><b>'+fmt(tt.f,0)+' g</b></div></div></section>';
-  /* Supplements */
-  var day=S.supps[tk]||{};
-  h+='<section class="st-card"><span class="st-l">Supplements</span>'+SUPPS.map(function(x){var on=!!day[x[0]];return'<div class="st-sup'+(on?' on':'')+'"><i></i>'+x[1]+'<span class="sr">'+(on?' genommen':' offen')+'</span></div>'}).join('')+'</section>';
   /* Woche */
   var ws=weekStart(t),nt=0,nr=0,cells='';
   for(var i=0;i<7;i++){
